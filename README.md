@@ -1,4 +1,6 @@
-# sys-netcheat
+# BetterSNC
+
+### Warning, the most of this files are like the original, i'm currently working on a news improved version and a companino application. Stay Tuned below there is the original README content
 
 ## Don't use this for online games! It'll ruin the experience for others and will probably get your switch banned in the process!
 
