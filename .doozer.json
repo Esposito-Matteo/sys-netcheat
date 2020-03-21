@@ -5,7 +5,7 @@
       "buildenv": "docker:devkitpro/devkita64",
 
       "buildcmd": [
-        "sudo -E make -j${PARALLEL} -C nx install"
+        "sudo -E make"
       ]
     },
 
