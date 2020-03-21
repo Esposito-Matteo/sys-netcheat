@@ -1,4 +1,15 @@
 /**
+ * @file processUtilities.c
+ * @author your name (you@domain.com)
+ * @brief 
+ * @version 0.1
+ * @date 2020-03-21
+ * 
+ * @copyright Copyright (c) 2020
+ * 
+ */
+#include "processUtilities.h"
+/**
  * @brief Scan the Procesess list and find a game-like process and try to get an handle for "debuggin process"
  * 
  * @return int 0 if ok, 1 else
