@@ -568,7 +568,7 @@ int main()
     mutexInit(&actionLock);
 
     Thread freezeThread;
-    Result rc = threadCreate(&freezeThread, freezeLoop, NULL, 0x4000, 49, 3);
+    Result rc = threadCreate(&freezeThread, freezeLoop, NULL, 0x4000, 49, 3,0);
     if (R_FAILED(rc))
         fatalLater(rc);
     rc = threadStart(&freezeThread);

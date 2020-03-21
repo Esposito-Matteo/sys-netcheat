@@ -1,20 +1,22 @@
 {
     "configurations": [
         {
-            "name": "Mac",
+            "name": "DKP aarch64",
             "includePath": [
-                "/opt/devkitpro/libnx/include/",
-                "${workspaceFolder}/source"
+                "A:/devkitPro/devkitA64/aarch64-none-elf/include/**",
+                "A:/devkitPro/devkitA64/lib/gcc/aarch64-none-elf/8.3.0/include/**",
+                "A:/devkitPro/libnx/include/**",
+                "A:/devkitPro/portlibs/switch/include/**"
             ],
-            "defines": [],
-            "macFrameworkPath": [
-                "/System/Library/Frameworks",
-                "/Library/Frameworks"
+            "defines": [
+                "SWITCH",
+                "__SWITCH__",
+                "DEBUG"
             ],
-            "compilerPath": "/usr/bin/clang",
+            "compilerPath": "A:/devkitPro/devkitA64/bin/aarch64-none-elf-g++",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "gcc-x64"
         }
     ],
     "version": 4
