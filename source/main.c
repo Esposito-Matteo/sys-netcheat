@@ -1,16 +1,4 @@
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/errno.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <switch.h>
-#include "args.h"
-#include "util.h"
-
-#define TITLE_ID 0x420000000000000F
-#define HEAP_SIZE 0x000340000
+#include "main.h"
 
 // we aren't an applet
 u32 __nx_applet_type = AppletType_None;
@@ -59,72 +47,6 @@ void __appExit(void)
     timeExit();
     socketExit();
 }
-
-#define MAX_LINE_LENGTH 300
-
-Handle debughandle = 0;
-enum
-{
-    VAL_NONE,
-    VAL_U8,
-    VAL_U16,
-    VAL_U32,
-    VAL_U64
-};
-char *valtypes[] = {"none", "u8", "u16", "u32", "u64"};
-
-int search = VAL_NONE;
-#define SEARCH_ARR_SIZE 500000
-u64 searchArr[SEARCH_ARR_SIZE];
-int searchSize;
-
-int sock = -1;
-
-static Mutex actionLock;
-/**
- * @brief Scan the Procesess list and find a game-like process and try to get an handle for "debuggin process"
- * 
- * @return int 0 if ok, 1 else
- */
-int attach()
-{
-    if (debughandle != 0)
-        svcCloseHandle(debughandle);
-    u64 pids[300];
-    u32 numProc;
-    svcGetProcessList(&numProc, pids, 300);
-    u64 pid = pids[numProc - 1];
-
-    Result rc = svcDebugActiveProcess(&debughandle, pid);
-    if (R_FAILED(rc))
-    {
-        printf("Couldn't open the process (Error: %x)\r\n"
-               "Make sure that you actually started a game.\r\n",
-               rc);
-        return 1;
-    }
-    return 0;
-}
-
-/**
- * @brief Detach itself from the previously attached process
- * 
- */
-void detach()
-{
-    if (debughandle != 0)
-        svcCloseHandle(debughandle);
-    debughandle = 0;
-}
-
-// TODO: move somewhere else, this is a mess!!!
-#define FREEZE_LIST_LEN 100
-u64 freezeAddrs[FREEZE_LIST_LEN];
-int freezeTypes[FREEZE_LIST_LEN];
-u64 freezeVals[FREEZE_LIST_LEN];
-int numFreezes = 0;
-
-// iot need it'0s own class
 
 // @Class List
 void freezeList()
@@ -570,8 +492,14 @@ help:
     return 0;
 }
 
+/**
+ * @brief Main Entrypoint of the Sys-Module
+ * 
+ * @return int Exit Status
+ */
 int main()
 {
+
     int listenfd = setupServerSocket();
 
     char *linebuf = malloc(sizeof(char) * MAX_LINE_LENGTH);
