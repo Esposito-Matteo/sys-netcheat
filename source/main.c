@@ -81,7 +81,11 @@ int searchSize;
 int sock = -1;
 
 static Mutex actionLock;
-
+/**
+ * @brief Scan the Procesess list and find a game-like process and try to get an handle for "debuggin process"
+ * 
+ * @return int 0 if ok, 1 else
+ */
 int attach()
 {
     if (debughandle != 0)
@@ -102,6 +106,10 @@ int attach()
     return 0;
 }
 
+/**
+ * @brief Detach itself from the previously attached process
+ * 
+ */
 void detach()
 {
     if (debughandle != 0)
@@ -109,12 +117,16 @@ void detach()
     debughandle = 0;
 }
 
+// TODO: move somewhere else, this is a mess!!!
 #define FREEZE_LIST_LEN 100
 u64 freezeAddrs[FREEZE_LIST_LEN];
 int freezeTypes[FREEZE_LIST_LEN];
 u64 freezeVals[FREEZE_LIST_LEN];
 int numFreezes = 0;
 
+// iot need it'0s own class
+
+// @Class List
 void freezeList()
 {
     for (int i = 0; i < numFreezes; i++)
@@ -193,6 +205,8 @@ void freezeLoop()
     }
 }
 
+
+// When someone doesn't know how to correctly programm!!!!!!!
 int argmain(int argc, char **argv)
 {
     if (argc == 0)
@@ -200,13 +214,13 @@ int argmain(int argc, char **argv)
 
     if (!strcmp(argv[0], "help") || !strcmp(argv[0], "h"))
     {
-        goto help;
+        goto help; // No PLEASE NO GOTO STATEMENT 
     }
 
     if (!strcmp(argv[0], "ssearch") || !strcmp(argv[0], "s"))
     {
         if (argc != 3)
-            goto help;
+            goto help; // Really?
 
         u8 u8query = 0;
         u16 u16query = 0;
@@ -568,7 +582,7 @@ int main()
     mutexInit(&actionLock);
 
     Thread freezeThread;
-    Result rc = threadCreate(&freezeThread, freezeLoop, NULL, 0x4000, 49, 3,0);
+    Result rc = threadCreate(&freezeThread, freezeLoop, NULL, 0x4000, 49, 3);
     if (R_FAILED(rc))
         fatalLater(rc);
     rc = threadStart(&freezeThread);
