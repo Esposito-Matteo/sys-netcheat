@@ -14,9 +14,12 @@ int sock = -1;
 Handle debughandle = 0;
 char *valtypes[] = {"none", "u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64"};
 int numFreezes = 0;
+HidsysNotificationLedPattern *pattern;
 
-
-
+HidsysNotificationLedPattern pattern;
+bool initflag=0;
+    size_t i;
+    size_t total_entries;
 
 // we aren't an applet
 u32 __nx_applet_type = AppletType_None;
@@ -34,10 +37,10 @@ void __libnx_initheap(void)
     fake_heap_start = fake_heap;
     fake_heap_end = fake_heap + HEAP_SIZE;
 }
-
+Result rc;
 void __appInit(void)
 {
-    Result rc;
+    
     svcSleepThread(20000000000L);
     rc = smInitialize();
     if (R_FAILED(rc))
@@ -665,6 +668,7 @@ int main(){
 
     char *linebuf = malloc(sizeof(char) * MAX_LINE_LENGTH);
 
+   
     int c = sizeof(struct sockaddr_in);
     struct sockaddr_in client;
     mutexInit(&actionLock);
@@ -696,6 +700,12 @@ int main(){
 
         printf("Welcome to netcheat!\r\n"
                "This needs an atmos-base >= 0.8.2\r\n");
+
+        // Setup and test Ligh Up Home Led Button
+
+        setupPattern(pattern);
+        Result *_rc;
+        lightUpLed(pattern,_rc)
 
         while (1)
         {
