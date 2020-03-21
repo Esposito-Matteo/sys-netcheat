@@ -11,6 +11,86 @@
  */
 #include "main.h"
 
+int sock = -1;
+Handle debughandle = 0;
+char *valtypes[] = {"none", "u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64"};
+int numFreezes = 0;
+
+
+int main(){
+
+    int listenfd = setupServerSocket();
+
+    char *linebuf = malloc(sizeof(char) * MAX_LINE_LENGTH);
+
+    int c = sizeof(struct sockaddr_in);
+    struct sockaddr_in client;
+    mutexInit(&actionLock);
+
+    Thread freezeThread;
+    Result rc = threadCreate(&freezeThread, freezeLoop, NULL, 0x4000, 49, 3,0);
+    if (R_FAILED(rc))
+        fatalLater(rc);
+    rc = threadStart(&freezeThread);
+    if (R_FAILED(rc))
+        fatalLater(rc);
+
+    while (appletMainLoop())
+    {
+        sock = accept(listenfd, (struct sockaddr *)&client, (socklen_t *)&c);
+        if (sock <= 0)
+        {
+            // Accepting fails after sleep for some reason.
+            svcSleepThread(1e+9L);
+            close(listenfd);
+            listenfd = setupServerSocket();
+            continue;
+        }
+
+        fflush(stdout);
+        dup2(sock, STDOUT_FILENO);
+        fflush(stderr);
+        dup2(sock, STDERR_FILENO);
+
+        printf("Welcome to netcheat!\r\n"
+               "This needs an atmos-base >= 0.8.2\r\n");
+
+        while (1)
+        {
+            write(sock, "> ", 2);
+
+            int len = recv(sock, linebuf, MAX_LINE_LENGTH, 0);
+            if (len < 1)
+            {
+                break;
+            }
+
+            linebuf[len - 1] = 0;
+
+            mutexLock(&actionLock);
+            if (attach(&debughandle)) {
+                mutexUnlock(&actionLock);
+                continue;
+            }
+
+            parseArgs(linebuf, &argmain);
+
+            detach(&debughandle);
+            mutexUnlock(&actionLock);
+
+            svcSleepThread(1e+8L);
+        }
+        detach(&debughandle);
+    }
+
+    if (debughandle != 0)
+        svcCloseHandle(debughandle);
+
+    return 0;
+}
+
+
+
 // we aren't an applet
 u32 __nx_applet_type = AppletType_None;
 
@@ -154,7 +234,8 @@ int argmain(int argc, char **argv)
 
     if (!strcmp(argv[0], "ssearch") || !strcmp(argv[0], "s"))
     {
-        return ssearch(argv[1],argv[2],argc);
+        int res = ssearch(argv[1],argv[2],argc);
+        return res;
     }
 
     if (!strcmp(argv[0], "csearch") || !strcmp(argv[0], "c"))
@@ -403,81 +484,8 @@ int argmain(int argc, char **argv)
 }
 
 
-int main(){
 
-    int listenfd = setupServerSocket();
-
-    char *linebuf = malloc(sizeof(char) * MAX_LINE_LENGTH);
-
-    int c = sizeof(struct sockaddr_in);
-    struct sockaddr_in client;
-    mutexInit(&actionLock);
-
-    Thread freezeThread;
-    Result rc = threadCreate(&freezeThread, freezeLoop, NULL, 0x4000, 49, 3,0);
-    if (R_FAILED(rc))
-        fatalLater(rc);
-    rc = threadStart(&freezeThread);
-    if (R_FAILED(rc))
-        fatalLater(rc);
-
-    while (appletMainLoop())
-    {
-        sock = accept(listenfd, (struct sockaddr *)&client, (socklen_t *)&c);
-        if (sock <= 0)
-        {
-            // Accepting fails after sleep for some reason.
-            svcSleepThread(1e+9L);
-            close(listenfd);
-            listenfd = setupServerSocket();
-            continue;
-        }
-
-        fflush(stdout);
-        dup2(sock, STDOUT_FILENO);
-        fflush(stderr);
-        dup2(sock, STDERR_FILENO);
-
-        printf("Welcome to netcheat!\r\n"
-               "This needs an atmos-base >= 0.8.2\r\n");
-
-        while (1)
-        {
-            write(sock, "> ", 2);
-
-            int len = recv(sock, linebuf, MAX_LINE_LENGTH, 0);
-            if (len < 1)
-            {
-                break;
-            }
-
-            linebuf[len - 1] = 0;
-
-            mutexLock(&actionLock);
-            if (attach(&debughandle)) {
-                mutexUnlock(&actionLock);
-                continue;
-            }
-
-            parseArgs(linebuf, &argmain);
-
-            detach(&debughandle);
-            mutexUnlock(&actionLock);
-
-            svcSleepThread(1e+8L);
-        }
-        detach(&debughandle);
-    }
-
-    if (debughandle != 0)
-        svcCloseHandle(debughandle);
-
-    return 0;
-}
-
-
-
-int ssearch(char *arg1,char *arg2,int argc)
+int ssearch(char *arg1,char *arg2, int argc)
 {
   if (argc != 3)
     {

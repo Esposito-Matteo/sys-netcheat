@@ -20,6 +20,8 @@
 #include <sys/errno.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#endif
+
 
 #include "args.h"
 #include "util.h"
@@ -29,7 +31,10 @@
 #define HEAP_SIZE 0x000340000
 #define MAX_LINE_LENGTH 300
 
-#endif
+#define SEARCH_ARR_SIZE 500000
+#define FREEZE_LIST_LEN 100
+
+
 enum
 {
     VAL_NONE,
@@ -44,25 +49,15 @@ enum
 };
 
 int search = VAL_NONE;
-#define SEARCH_ARR_SIZE 500000
 u64 searchArr[SEARCH_ARR_SIZE];
 int searchSize;
 
-int sock = -1;
-
-Handle debughandle = 0;
-
-char *valtypes[] = {"none", "u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64"};
 
 
 static Mutex actionLock;
-
-
-#define FREEZE_LIST_LEN 100
 u64 freezeAddrs[FREEZE_LIST_LEN];
 int freezeTypes[FREEZE_LIST_LEN];
 u64 freezeVals[FREEZE_LIST_LEN];
-int numFreezes = 0;
 
 void printHelp();
 int ssearch(char *arg1,char *arg2, int argc);
