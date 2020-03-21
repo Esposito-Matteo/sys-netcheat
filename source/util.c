@@ -60,9 +60,9 @@ void fatalLater(Result err)
     svcCloseHandle(srv);
 }
 
-void setupPattern(HidsysNotificationLedPattern *pattern) //thanks https://github.com/ELY3M/Lighting-up-LED-on-right-joycon-for-Nintendo-Switch
+void setupPattern(HidsysNotificationLedPattern pattern) //thanks https://github.com/ELY3M/Lighting-up-LED-on-right-joycon-for-Nintendo-Switch
 {
-    pattern.baseMiniCycleDuration = 0x1;                // 12.5 ms
+        pattern.baseMiniCycleDuration = 0x1;                // 12.5 ms
         pattern.totalMiniCycles = 0x0;                   // 0+1 mini cycles. Last one 12.5ms.
         pattern.totalFullCycles = 0x1;                   // Repeat Only Once.
         pattern.startIntensity = 0xF;                    // 100%.
@@ -78,15 +78,15 @@ void setupPattern(HidsysNotificationLedPattern *pattern) //thanks https://github
 
 }
 
-void lightUpLed(HidsysNotificationLedPattern *pattern, Result rc)}{
-        total_entries = 0;
+void lightUpLed(HidsysNotificationLedPattern pattern, Result rc){
+        int total_entries = 0;
         memset(UniquePadIds, 0, sizeof(UniquePadIds));
-
+        
         // Get the UniquePadIds for the specified controller, which will then be used with hidsysSetNotificationLedPattern.
         // If you want to get the UniquePadIds for all controllers, you can use hidsysGetUniquePadIds instead.
         rc = hidsysGetUniquePadsFromNpad(hidGetHandheldMode() ? CONTROLLER_HANDHELD : CONTROLLER_PLAYER_1, UniquePadIds, 2, &total_entries);
        if (R_SUCCEEDED(rc)) {
-        for (i = 0; i < total_entries; i++) { // System will skip sending the subcommand to controllers where this isn't available.
+        for (int i = 0; i < total_entries; i++) { // System will skip sending the subcommand to controllers where this isn't available.
             rc = hidsysSetNotificationLedPattern(&pattern, UniquePadIds[i]);
         }
        }

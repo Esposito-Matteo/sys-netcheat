@@ -25,5 +25,5 @@ u64 UniquePadIds[2];
 
 void fatalLater(Result err);
 int setupServerSocket();
-void setupPattern(HidsysNotificationLedPattern *pattern); //thanks https://github.com/ELY3M/Lighting-up-LED-on-right-joycon-for-Nintendo-Switch
-void lightUpLed(HidsysNotificationLedPattern *pattern, Result rc);
+void setupPattern(HidsysNotificationLedPattern pattern); //thanks https://github.com/ELY3M/Lighting-up-LED-on-right-joycon-for-Nintendo-Switch
+void lightUpLed(HidsysNotificationLedPattern pattern, Result rc);
