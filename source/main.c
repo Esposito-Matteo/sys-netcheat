@@ -697,11 +697,10 @@ int main(){
         fflush(stderr);
         dup2(sock, STDERR_FILENO);
 
-        printf("Welcome to netcheat!\r\n"
+        printf("Welcome to BetterSNC!\r\n"
                "This needs an atmos-base >= 0.8.2\r\n");
 
         // Setup and test Ligh Up Home Led Button
-
         setupPattern(pattern);
         Result *_rc;
         lightUpLed(pattern,_rc);
