@@ -1,5 +1,6 @@
 /**
  * @file main.c
+ * @originalAuth jakibaki ( Emily Dietrich )
  * @author Matteo Esposito
  * @brief Main Function
  * @version 2.1
@@ -15,6 +16,78 @@ Handle debughandle = 0;
 char *valtypes[] = {"none", "u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64"};
 int numFreezes = 0;
 
+
+int main(){
+
+    int listenfd = setupServerSocket();
+
+    char *linebuf = malloc(sizeof(char) * MAX_LINE_LENGTH);
+
+    int c = sizeof(struct sockaddr_in);
+    struct sockaddr_in client;
+    mutexInit(&actionLock);
+
+    Thread freezeThread;
+    Result rc = threadCreate(&freezeThread, freezeLoop, NULL, 0x4000, 49, 3,0);
+    if (R_FAILED(rc))
+        fatalLater(rc);
+    rc = threadStart(&freezeThread);
+    if (R_FAILED(rc))
+        fatalLater(rc);
+
+    while (appletMainLoop())
+    {
+        sock = accept(listenfd, (struct sockaddr *)&client, (socklen_t *)&c);
+        if (sock <= 0)
+        {
+            // Accepting fails after sleep for some reason.
+            svcSleepThread(1e+9L);
+            close(listenfd);
+            listenfd = setupServerSocket();
+            continue;
+        }
+
+        fflush(stdout);
+        dup2(sock, STDOUT_FILENO);
+        fflush(stderr);
+        dup2(sock, STDERR_FILENO);
+
+        printf("Welcome to netcheat!\r\n"
+               "This needs an atmos-base >= 0.8.2\r\n");
+
+        while (1)
+        {
+            write(sock, "> ", 2);
+
+            int len = recv(sock, linebuf, MAX_LINE_LENGTH, 0);
+            if (len < 1)
+            {
+                break;
+            }
+
+            linebuf[len - 1] = 0;
+
+            mutexLock(&actionLock);
+            if (attach(&debughandle)) {
+                mutexUnlock(&actionLock);
+                continue;
+            }
+
+            parseArgs(linebuf, &argmain);
+
+            detach(&debughandle);
+            mutexUnlock(&actionLock);
+
+            svcSleepThread(1e+8L);
+        }
+        detach(&debughandle);
+    }
+
+    if (debughandle != 0)
+        svcCloseHandle(debughandle);
+
+    return 0;
+}
 
 
 
@@ -146,6 +219,7 @@ void freezeLoop()
 }
 
 
+// When someone doesn't know how to correctly programm!!!!!!!
 int argmain(int argc, char **argv)
 {
     if (argc == 0)
@@ -410,14 +484,7 @@ int argmain(int argc, char **argv)
 }
 
 
-/**
- * @brief New search function
- * 
- * @param arg1 DataType (u/s int)
- * @param arg2 Data Value
- * @param argc Arguments Count
- * @return int 0 success 1 failure
- */
+
 int ssearch(char *arg1,char *arg2, int argc)
 {
   if (argc != 3)
@@ -654,79 +721,3 @@ void printHelp()
            "    dfreeze index                        | Unfreezes the memory at index\r\n");
 }
 
-/**
- * @brief Main Function
- * 
- * @return int 
- */
-int main(){
-
-    int listenfd = setupServerSocket();
-
-    char *linebuf = malloc(sizeof(char) * MAX_LINE_LENGTH);
-
-    int c = sizeof(struct sockaddr_in);
-    struct sockaddr_in client;
-    mutexInit(&actionLock);
-
-    Thread freezeThread;
-    Result rc = threadCreate(&freezeThread, freezeLoop, NULL, 0x4000, 49, 3,0);
-    if (R_FAILED(rc))
-        fatalLater(rc);
-    rc = threadStart(&freezeThread);
-    if (R_FAILED(rc))
-        fatalLater(rc);
-
-    while (appletMainLoop())
-    {
-        sock = accept(listenfd, (struct sockaddr *)&client, (socklen_t *)&c);
-        if (sock <= 0)
-        {
-            // Accepting fails after sleep for some reason.
-            svcSleepThread(1e+9L);
-            close(listenfd);
-            listenfd = setupServerSocket();
-            continue;
-        }
-
-        fflush(stdout);
-        dup2(sock, STDOUT_FILENO);
-        fflush(stderr);
-        dup2(sock, STDERR_FILENO);
-
-        printf("Welcome to netcheat!\r\n"
-               "This needs an atmos-base >= 0.8.2\r\n");
-
-        while (1)
-        {
-            write(sock, "> ", 2);
-
-            int len = recv(sock, linebuf, MAX_LINE_LENGTH, 0);
-            if (len < 1)
-            {
-                break;
-            }
-
-            linebuf[len - 1] = 0;
-
-            mutexLock(&actionLock);
-            if (attach(&debughandle)) {
-                mutexUnlock(&actionLock);
-                continue;
-            }
-
-            parseArgs(linebuf, &argmain);
-
-            detach(&debughandle);
-            mutexUnlock(&actionLock);
-
-            svcSleepThread(1e+8L);
-        }
-        detach(&debughandle);
-    }
-
-    if (debughandle != 0)
-        svcCloseHandle(debughandle);
-
-    return 0;
-}

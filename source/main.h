@@ -9,8 +9,8 @@
  * 
  */
 
-#ifndef main
-#define main
+#ifndef main_H
+#define main_H
 
 #include <string.h>
 #include <switch.h>
