@@ -16,7 +16,6 @@ char *valtypes[] = {"none", "u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64"
 int numFreezes = 0;
 HidsysNotificationLedPattern *pattern;
 
-HidsysNotificationLedPattern pattern;
 bool initflag=0;
     size_t i;
     size_t total_entries;
@@ -705,7 +704,7 @@ int main(){
 
         setupPattern(pattern);
         Result *_rc;
-        lightUpLed(pattern,_rc)
+        lightUpLed(pattern,_rc);
 
         while (1)
         {
